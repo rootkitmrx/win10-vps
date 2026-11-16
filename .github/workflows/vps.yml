@@ -1,4 +1,4 @@
-name: Windows 10 VPS (LocalTunnel)
+name: Windows 10 VPS (Serveo)
 
 on:
   workflow_dispatch:
@@ -8,11 +8,6 @@ jobs:
     runs-on: windows-2022
     
     steps:
-    - name: Node.js Doğrudan İndir ve Kur
-      run: |
-        Invoke-WebRequest -Uri "https://nodejs.org/dist/v18.16.0/node-v18.16.0-x64.msi" -OutFile "node.msi"
-        Start-Process msiexec.exe -Wait -ArgumentList '/i node.msi /quiet /norestart'
-        
     - name: RDP (Uzak Masaüstü) Servisini Aç
       run: |
         Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
@@ -23,12 +18,10 @@ jobs:
       run: |
         net user runneradmin GucluSifre123!
 
-    - name: LocalTunnel Kur ve Port 3389'u Tünelle
+    - name: Serveo ile TCP Tüneli Başlat (Port 3389)
       run: |
-        # Node yüklendikten sonra PATH'in güncellenmesi için komut satırı yenilenir
-        $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
-        npm install -g localtunnel
-        lt --port 3389
+        # Windows'un yerleşik SSH aracı ile serveo üzerinden tünel açıyoruz
+        ssh -o StrictHostKeyChecking=no -R 0:localhost:3389 serveo.net
 
     - name: Bağlantıyı Açık Tut
       run: |
