@@ -1,0 +1,32 @@
+name: Windows 10 VPS (LocalTunnel)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-2022
+    
+    steps:
+    - name: Node.js Kurulumu (LocalTunnel için)
+      run: |
+        winget install OpenJS.NodeJS
+
+    - name: RDP (Uzak Masaüstü) Servisini Aç
+      run: |
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
+        Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 1
+        
+    - name: Yönetici Şifresi Belirle
+      run: |
+        net user runneradmin GucluSifre123!
+
+    - name: LocalTunnel Kur ve Port 3389'u Tünelle
+      run: |
+        npm install -g localtunnel
+        lt --port 3389
+
+    - name: Bağlantıyı Açık Tut
+      run: |
+        Start-Sleep -Seconds 21600
