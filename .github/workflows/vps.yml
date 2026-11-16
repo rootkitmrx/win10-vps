@@ -8,10 +8,11 @@ jobs:
     runs-on: windows-2022
     
     steps:
-    - name: Node.js Kurulumu (LocalTunnel için)
+    - name: Node.js Doğrudan İndir ve Kur
       run: |
-        winget install OpenJS.NodeJS
-
+        Invoke-WebRequest -Uri "https://nodejs.org/dist/v18.16.0/node-v18.16.0-x64.msi" -OutFile "node.msi"
+        Start-Process msiexec.exe -Wait -ArgumentList '/i node.msi /quiet /norestart'
+        
     - name: RDP (Uzak Masaüstü) Servisini Aç
       run: |
         Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
@@ -24,6 +25,8 @@ jobs:
 
     - name: LocalTunnel Kur ve Port 3389'u Tünelle
       run: |
+        # Node yüklendikten sonra PATH'in güncellenmesi için komut satırı yenilenir
+        $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
         npm install -g localtunnel
         lt --port 3389
 
